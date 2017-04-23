@@ -442,9 +442,20 @@ export class VirtualScroll implements DoCheck, AfterContentInit, OnDestroy {
     let needClean = false;
     if (changes) {
       var lastRecord = this.lastRecord() + 1;
-      changes.forEachOperation((item, _, cindex) => {
-        if (item.previousIndex != null || (cindex < lastRecord)) {
+
+      changes.forEachOperation((_, pindex, cindex) => {
+
+        // add new record after current position
+        if (pindex === null && (cindex < lastRecord)) {
+          console.debug('adding record after current position, no recalculation needed');
           needClean = true;
+          return;
+        }
+        // remove record after current position
+        if (pindex < lastRecord && cindex === null) {
+          console.debug('removing record after current position, no recalculation needed');
+          needClean = true;
+          return;
         }
       });
     } else {
@@ -540,7 +551,7 @@ export class VirtualScroll implements DoCheck, AfterContentInit, OnDestroy {
           this._itmTmp.viewContainer,
           this._itmTmp.templateRef,
           this._hdrTmp && this._hdrTmp.templateRef,
-          this._ftrTmp && this._ftrTmp.templateRef, needClean,
+          this._ftrTmp && this._ftrTmp.templateRef, needClean
         );
       });
 
